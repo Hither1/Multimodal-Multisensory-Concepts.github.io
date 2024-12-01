@@ -1,0 +1,70 @@
+Multimodal Concepts
+
+from bokeh.io import output_notebook
+output_notebook()
+from bokeh.plotting import figure, output_file, show, ColumnDataSource
+from bokeh.models import HoverTool, LassoSelectTool, WheelZoomTool, LinearColorMapper, BoxZoomTool, ResetTool
+
+color_mapper = LinearColorMapper(palette='Viridis256', low=min(k), high=max(k))
+output_file("euclidean.html")
+
+source = ColumnDataSource(
+        data=dict(
+            x=e[:, 0],
+            y=e[:, 1],
+            k=k,
+            desc=names,
+            img = [f'https://storage.googleapis.com/serrelab/loupe/fviz/{class_mapping[i][0]}_{class_mapping[i][1]}.png' for i in ids],
+            c1 = [f'https://storage.googleapis.com/serrelab/loupe/crops/{class_mapping[i][0]}_{class_mapping[i][1]}_1.png' for i in ids],
+            c2 = [f'https://storage.googleapis.com/serrelab/loupe/crops/{class_mapping[i][0]}_{class_mapping[i][1]}_2.png' for i in ids],
+            c3 = [f'https://storage.googleapis.com/serrelab/loupe/crops/{class_mapping[i][0]}_{class_mapping[i][1]}_3.png' for i in ids],
+        )
+    )
+
+hover = HoverTool(
+        tooltips="""
+        <div>
+            <div style="position: relative; height: 215px;">
+                <img
+                    src="@img" height="200" alt="@imgs" width="200"
+                    style="float: left; margin: 0px 15px 15px 0px;"
+                    border="2"
+                ></img>
+                <img
+                    src="@c1" height="50" alt="@c1" width="50"
+                    style="position: relative; left: -210px; top: 10px;"
+                    border="0"
+                ></img>
+                <img
+                    src="@c2" height="50" alt="@c2" width="50"
+                    style="position: relative; left: -200px; top: 10px;"
+                    border="0"
+                ></img>
+                <img
+                    src="@c3" height="50" alt="@c3" width="50"
+                    style="position: relative; left: -190px; top: 10px;"
+                    border="0"
+                ></img>
+
+            </div>
+            <div>
+                <span style="font-size: 17px; font-weight: bold;">@desc</span>
+                <span style="font-size: 15px; color: #966;">[$index]</span>
+            </div>
+            <div>
+                <span style="font-size: 15px;">Location</span>
+                <span style="font-size: 10px; color: #696;">($x, $y)</span>
+            </div>
+        </div>
+        """
+    )
+
+p = figure(width=800, height=800, tools=[hover],
+           title="Mouse over the dots")
+p.circle('x', 'y', size=5, source=source, color={'field': 'k', 'transform': color_mapper})
+
+tools = [BoxZoomTool(), ResetTool(), LassoSelectTool(), WheelZoomTool()]
+for t in tools:
+  p.add_tools(t)
+
+show(p)
